@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>Racing for Dimastecu</title>
+<style>
+:root{--orange:#ff7800;--dark:#101114;--white:#f7f7f7}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101114;color:white;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;touch-action:none}button{font:inherit;border:0;cursor:pointer;touch-action:manipulation}.screen{position:fixed;inset:0;display:none}.screen.active{display:flex}.lobby{align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at 50% 30%,#35383e 0,#17181c 48%,#09090b 100%)}.lobby:before{content:"";position:absolute;inset:0;opacity:.12;background:repeating-linear-gradient(135deg,transparent 0 26px,#fff 27px 29px,transparent 30px 56px);pointer-events:none}.panel{z-index:1;width:min(100%,430px);text-align:center;padding:28px 22px;border:1px solid #555;border-radius:24px;background:linear-gradient(160deg,#26282d,#111215 70%);box-shadow:0 20px 70px #0009}.logoMark{width:74px;height:74px;border-radius:22px;margin:0 auto 14px;display:grid;place-items:center;background:linear-gradient(135deg,#ffb24a,var(--orange));color:#171717;font-size:38px;font-weight:1000;transform:skew(-7deg);box-shadow:0 0 35px #ff780055}.eyebrow{letter-spacing:.32em;color:#ff9a3e;font-size:11px;font-weight:900}.title{font-size:clamp(30px,8vw,45px);line-height:.98;font-weight:1000;letter-spacing:-1.5px;margin:10px 0}.title span{color:var(--orange)}.subtitle{color:#c6c6c8;font-size:13px;margin:12px 0 24px}.previewRoad{height:100px;border-radius:12px;margin:0 0 22px;overflow:hidden;position:relative;background:#3c3d40;border-left:5px solid #eee;border-right:5px solid #eee}.previewRoad:before{content:"";position:absolute;left:50%;height:200%;top:-50%;border-left:5px dashed #eee;animation:road 1s linear infinite}.miniCar{position:absolute;left:28%;bottom:9px;width:29px;height:47px;border-radius:9px;background:#f52a23;border:3px solid #a10f0b;box-shadow:inset 0 7px #ff9b80}.miniCar:after{content:"";position:absolute;left:4px;right:4px;top:9px;height:14px;background:#c9e9f4;border-radius:4px}.btn{width:100%;border-radius:13px;padding:15px 18px;font-weight:950;letter-spacing:.08em}.start{background:linear-gradient(100deg,#ff9a24,#ff6500);color:#151515;box-shadow:0 7px 0 #9d3c00,0 0 24px #ff780033}.secondary{margin-top:15px;background:#27282c;color:#fff;border:1px solid #555}.hint{font-size:11px;color:#a8a8aa;margin-top:18px}.game{background:#1b1c1f}.hud{position:absolute;z-index:4;top:env(safe-area-inset-top,0);left:0;right:0;display:flex;gap:8px;justify-content:space-between;padding:12px 12px 8px;pointer-events:none}.stat{min-width:0;flex:1;background:#111c;border:1px solid #ffffff2b;border-radius:10px;padding:7px 9px;backdrop-filter:blur(5px)}.stat small{display:block;color:#ffb36b;font-size:9px;font-weight:900;letter-spacing:.1em}.stat b{font-size:16px;font-variant-numeric:tabular-nums}.stat .unit{font-size:10px;color:#bbb}.gameCanvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}.bottomHud{position:absolute;z-index:4;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);left:12px;right:12px;display:flex;align-items:end;justify-content:space-between;pointer-events:none}.tip{background:#101b;border:1px solid #ffffff2a;border-radius:10px;padding:8px 10px;color:#eee;font-size:11px}.pause{pointer-events:auto;background:#17181d;color:#fff;border:1px solid #ffffff55;border-radius:12px;width:46px;height:42px;font-weight:900}.overlay{position:absolute;z-index:6;inset:0;display:none;align-items:center;justify-content:center;background:#0009;padding:24px}.overlay.show{display:flex}.overlayCard{width:min(100%,340px);padding:25px;background:#17181c;border:1px solid #666;border-radius:20px;text-align:center}.overlayCard h2{margin:0 0 8px;color:var(--orange)}.overlayCard p{color:#ddd;font-size:13px;line-height:1.5}.overlayCard .btn{margin-top:9px}@keyframes road{to{transform:translateY(50px)}}
+</style></head><body>
+<section id="lobby" class="screen lobby active"><div class="panel"><div class="logoMark">RF</div><div class="eyebrow">ARCADE ROAD RACING · UPDATE 2</div><h1 class="title">RACING FOR<br><span>DIMASTECU</span></h1><p class="subtitle">Hindari lalu lintas. Selesaikan 3 lap. Jangan sampai tabrakan!</p><div class="previewRoad"><div class="miniCar"></div></div><button id="startBtn" class="btn start">▶ &nbsp; START RACING</button><button id="soundBtn" class="btn secondary">♫ &nbsp; SOUND: ON</button><div class="hint">KONTROL: GESER JARI KE KIRI / KANAN / DEPAN / BELAKANG</div></div></section>
+<section id="game" class="screen game"><canvas id="canvas" class="gameCanvas"></canvas><div class="hud"><div class="stat"><small>KECEPATAN</small><b id="speed">0</b> <span class="unit">km/j</span></div><div class="stat"><small>JARAK</small><b id="distance">0.00</b> <span class="unit">km</span></div><div class="stat"><small>LAP</small><b id="lap">1/3</b></div></div><div class="bottomHud"><div class="tip">👆 Geser jari relatif: mobil bergerak tanpa menempel ke jari</div><button id="pauseBtn" class="pause">Ⅱ</button></div><div id="overlay" class="overlay"><div class="overlayCard"><h2 id="overlayTitle">PAUSE</h2><p id="overlayText">Geser jari untuk mengendalikan mobil merah.</p><button id="resumeBtn" class="btn start">LANJUT BALAP</button><button id="restartBtn" class="btn secondary">ULANGI BALAP</button><button id="homeBtn" class="btn secondary">KEMBALI KE LOBBY</button></div></div></section>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), lobby=$('lobby'),game=$('game'),canvas=$('canvas'),ctx=canvas.getContext('2d');
+let soundOn=true,audioCtx=null,running=false,paused=false,ended=false,last=0,roadScroll=0,distance=0,speed=175,playerX=.5,playerY=.78,traffic=[],spawnClock=0,crashFlash=0,lapLength=5000,totalLength=15000,canvasW=360,canvasH=640,dpr=1,swipeActive=false,pointerId=null,touchStartX=0,touchStartY=0,touchStartPlayerX=.5,touchStartPlayerY=.78;
+function beep(freq=540,duration=.055,type='sine',volume=.045){if(!soundOn)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=volume;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function clickSound(){beep(620,.045);setTimeout(()=>beep(850,.035,'triangle',.025),35)}
+$('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'♫  SOUND: ON':'♫  SOUND: OFF';if(soundOn)clickSound()};
+$('startBtn').onclick=()=>{clickSound();startGame()};$('pauseBtn').onclick=()=>{if(!running||ended)return;paused=true;showOverlay('PAUSE','Balapan dijeda. Tekan lanjut untuk meneruskan.');clickSound()};$('resumeBtn').onclick=()=>{if(ended){startGame();return}paused=false;$('overlay').classList.remove('show');last=performance.now();clickSound()};$('restartBtn').onclick=()=>{clickSound();startGame()};$('homeBtn').onclick=()=>{clickSound();running=false;game.classList.remove('active');lobby.classList.add('active');$('overlay').classList.remove('show')};
+function showOverlay(title,msg){$('overlayTitle').textContent=title;$('overlayText').textContent=msg;$('overlay').classList.add('show')}
+function resize(){dpr=Math.min(window.devicePixelRatio||1,2);canvasW=window.innerWidth;canvasH=window.innerHeight;canvas.width=Math.floor(canvasW*dpr);canvas.height=Math.floor(canvasH*dpr);canvas.style.width=canvasW+'px';canvas.style.height=canvasH+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}window.addEventListener('resize',resize);resize();
+function roadGeom(){const w=canvasW,h=canvasH;const roadW=Math.min(w*.82,470),left=(w-roadW)/2;return {w,h,roadW,left,right:left+roadW,laneW:roadW/3}}
+function startGame(){resize();lobby.classList.remove('active');game.classList.add('active');$('overlay').classList.remove('show');running=true;paused=false;ended=false;last=performance.now();roadScroll=0;distance=0;speed=175;playerX=.5;playerY=.78;traffic=[];spawnClock=0;crashFlash=0;for(let i=0;i<4;i++)spawnTraffic(-i*175-130);requestAnimationFrame(frame)}
+function spawnTraffic(y=-80){const r=roadGeom(),lane=Math.floor(Math.random()*3);let kind;const roll=Math.random();kind=roll<.48?'sedan':roll<.75?'truck':'motor';traffic.push({kind,lane,x:(lane+.5)/3,y:y-r.h*.18,pace:.52+Math.random()*.36,color:kind==='truck'?'#39a900':kind==='motor'?'#19a6df':['#f26a37','#4399e8','#dedede','#e6bd30'][Math.floor(Math.random()*4)],passed:false})}
+function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke()}}
+function drawCar(x,y,w,h,color,kind='sedan',player=false){ctx.save();ctx.translate(x,y);const s=kind==='truck'?1:kind==='motor'?.58:1;ctx.scale(s,1); // every vehicle points UP, same direction
+// shadow
+ctx.fillStyle='#0007';ctx.beginPath();ctx.ellipse(2,5,w*.55,h*.48,0,0,Math.PI*2);ctx.fill();
+if(kind==='truck'){
+ roundedRect(-w*.48,-h*.47,w*.96,h*.94,5,'#202126');roundedRect(-w*.42,-h*.44,w*.84,h*.57,color,'#111');roundedRect(-w*.36,h*.12,w*.72,h*.29,'#33383d','#111');roundedRect(-w*.31,h*.15,w*.62,h*.20,'#b8e6f4');ctx.fillStyle='#ffefb0';ctx.fillRect(-w*.36,-h*.39,w*.13,3);ctx.fillRect(w*.23,-h*.39,w*.13,3);
+}else if(kind==='motor'){
+ ctx.fillStyle='#141518';ctx.beginPath();ctx.ellipse(0,-h*.27,w*.18,h*.20,0,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.ellipse(0,h*.29,w*.17,h*.2,0,0,Math.PI*2);ctx.fill();roundedRect(-w*.2,-h*.29,w*.4,h*.58,5,color,'#171719');roundedRect(-w*.14,-h*.13,w*.28,h*.18,4,'#222');ctx.fillStyle='#fff0c7';ctx.fillRect(-w*.08,-h*.28,w*.16,3);
+}else{
+ roundedRect(-w*.46,-h*.48,w*.92,h*.96,Math.min(10,w*.22),color,'#151515');roundedRect(-w*.34,-h*.28,w*.68,h*.30,5,'#1d242b','#101114');roundedRect(-w*.32,h*.07,w*.64,h*.23,4,'#a7d8e8','#26333a');ctx.fillStyle='#f7f0d0';ctx.fillRect(-w*.35,-h*.43,w*.18,4);ctx.fillRect(w*.17,-h*.43,w*.18,4);ctx.fillStyle='#d61f16';ctx.fillRect(-w*.34,h*.39,w*.17,3);ctx.fillRect(w*.17,h*.39,w*.17,3);
+}
+// wheels on sides
+ctx.fillStyle='#0c0c0d';for(const side of [-1,1]){ctx.fillRect(side*w*.42-w*.035,-h*.29,w*.09,h*.20);ctx.fillRect(side*w*.42-w*.035,h*.12,w*.09,h*.20)}
+if(player){ctx.strokeStyle='#ffb15c';ctx.lineWidth=2;ctx.strokeRect(-w*.52,-h*.51,w*1.04,h*1.02)}ctx.restore()}
+function drawRoad(dt){const {w,h,roadW,left,right,laneW}=roadGeom();ctx.fillStyle='#286e37';ctx.fillRect(0,0,w,h); // roadside strips and moving texture
+ctx.fillStyle='#477d45';for(let y=-80+(roadScroll%100);y<h;y+=100){ctx.fillRect(left-roadW*.13,y,roadW*.08,42);ctx.fillRect(right+roadW*.05,y+30,roadW*.08,40)}
+ctx.fillStyle='#36383d';ctx.fillRect(left,0,roadW,h);ctx.fillStyle='#f4f2e9';ctx.fillRect(left,0,5,h);ctx.fillRect(right-5,0,5,h);
+// dashed lane markers scroll DOWN, giving real forward movement
+const dashH=42,gap=35,offset=roadScroll%(dashH+gap);ctx.fillStyle='#f4f3e9';for(let i=1;i<=2;i++){for(let y=-dashH+offset;y<h;y+=dashH+gap)ctx.fillRect(left+laneW*i-2,y,4,dashH)}
+// roadside repeating reflectors
+for(let y=-20+(roadScroll%75);y<h;y+=75){ctx.fillStyle='#ff9b30';ctx.fillRect(left-10,y,4,15);ctx.fillRect(right+6,y+30,4,15)}
+}
+function draw(){const {w,h,roadW,left,right,laneW}=roadGeom();ctx.clearRect(0,0,w,h);drawRoad(); // perspective-like top-down traffic
+traffic.sort((a,b)=>a.y-b.y);for(const t of traffic){const x=left+t.x*roadW;const th=t.kind==='truck'?78:t.kind==='motor'?43:59;const tw=t.kind==='truck'?40:t.kind==='motor'?22:34;drawCar(x,t.y,tw,th,t.color,t.kind,false)}
+const px=left+playerX*roadW;drawCar(px,h*playerY,Math.min(43,roadW*.12),Math.min(78,h*.105),'#f32620','player',true);
+if(crashFlash>0){ctx.fillStyle=`rgba(255,60,0,${Math.min(.3,crashFlash*.3)})`;ctx.fillRect(0,0,w,h)}
+}
+function frame(now){if(!running)return;requestAnimationFrame(frame);if(paused)return;let dt=Math.min((now-last)/1000,.05);last=now;if(!dt)return;
+// Auto-forward motion: road marks and traffic move down relative to the player.
+speed=Math.min(300,175+distance/1000*5.0);const metersPerSec=speed/3.6;distance+=metersPerSec*dt;roadScroll+=metersPerSec*dt*1.65;spawnClock+=dt;if(spawnClock>(1.15-Math.min(.35,distance/40000))){spawnClock=0;spawnTraffic(-90)}
+for(const t of traffic){t.y+=metersPerSec*dt*(.95+t.pace*.42);if(!t.passed&&t.y>canvasH*playerY+50){t.passed=true;beep(330,.025,'sine',.012)}}
+traffic=traffic.filter(t=>t.y<canvasH+120);const r=roadGeom(),px=r.left+playerX*r.roadW,py=canvasH*playerY,pw=Math.min(43,r.roadW*.12),ph=Math.min(78,canvasH*.105);
+for(const t of traffic){const th=t.kind==='truck'?78:t.kind==='motor'?43:59,tw=t.kind==='truck'?40:t.kind==='motor'?22:34,tx=r.left+t.x*r.roadW;if(Math.abs(tx-px)<(tw+pw)*.43&&Math.abs(t.y-py)<(th+ph)*.43){crashFlash=.7;running=false;ended=true;showOverlay('TABRAKAN!','Balapan berhenti. Coba geser lebih awal untuk menghindari kendaraan. Jarak: '+(distance/1000).toFixed(2)+' km.');beep(140,.24,'sawtooth',.07);return}}
+crashFlash=Math.max(0,crashFlash-dt);$('speed').textContent=Math.round(speed);$('distance').textContent=(distance/1000).toFixed(2);$('lap').textContent=Math.min(3,Math.floor(distance/lapLength)+1)+'/3';if(distance>=totalLength){running=false;ended=true;showOverlay('FINISH! 🏁','Keren! Lu menyelesaikan 3 lap dengan jarak 15 km.');beep(700,.1);setTimeout(()=>beep(900,.16),130);return}draw()}
+function beginRelativeDrag(e){
+// Simpan posisi jari dan posisi mobil saat sentuhan dimulai. Mobil TIDAK
+// melompat ke posisi jari; hanya selisih gerakan jari yang menggeser mobil.
+const r=canvas.getBoundingClientRect();
+touchStartX=e.clientX; touchStartY=e.clientY;
+touchStartPlayerX=playerX; touchStartPlayerY=playerY;
+}
+function moveFromEvent(e){const r=canvas.getBoundingClientRect();
+const dx=(e.clientX-touchStartX)/Math.max(1,r.width);
+const dy=(e.clientY-touchStartY)/Math.max(1,r.height);
+// Gerakan jari relatif: geser ke atas = mobil maju, ke bawah = mundur.
+// Sensitivitas dibuat lebih halus supaya kontrol nyaman di layar HP.
+playerX=Math.max(.17,Math.min(.83,touchStartPlayerX+dx*1.35));
+playerY=Math.max(.40,Math.min(.86,touchStartPlayerY+dy*1.15));
+}
+canvas.addEventListener('pointerdown',e=>{if(!running||paused)return;swipeActive=true;pointerId=e.pointerId;canvas.setPointerCapture?.(pointerId);beginRelativeDrag(e);e.preventDefault()});canvas.addEventListener('pointermove',e=>{if(!swipeActive||e.pointerId!==pointerId||!running||paused)return;moveFromEvent(e);e.preventDefault()});function endPointer(e){if(e.pointerId===pointerId){swipeActive=false;pointerId=null}}canvas.addEventListener('pointerup',endPointer);canvas.addEventListener('pointercancel',endPointer);
+// draw a still road preview before starting
+function lobbyPreview(){if(!game.classList.contains('active'))return;draw();requestAnimationFrame(lobbyPreview)}
+})();
+</script></body></html>
