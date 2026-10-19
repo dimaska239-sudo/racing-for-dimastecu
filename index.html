@@ -10,7 +10,7 @@
 <script>
 (()=>{'use strict';
 const $=id=>document.getElementById(id), lobby=$('lobby'),game=$('game'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-let soundOn=true,audioCtx=null,running=false,paused=false,ended=false,last=0,roadScroll=0,distance=0,speed=175,playerX=.5,playerY=.78,traffic=[],spawnClock=0,crashFlash=0,lapLength=5000,totalLength=15000,canvasW=360,canvasH=640,dpr=1,swipeActive=false,pointerId=null,touchStartX=0,touchStartY=0,touchStartPlayerX=.5,touchStartPlayerY=.78;
+let soundOn=true,audioCtx=null,running=false,paused=false,ended=false,last=0,roadScroll=0,distance=0,speed=320,playerX=.5,playerY=.78,traffic=[],spawnClock=0,crashFlash=0,lapLength=5000,totalLength=15000,canvasW=360,canvasH=640,dpr=1,swipeActive=false,pointerId=null,touchStartX=0,touchStartY=0,touchStartPlayerX=.5,touchStartPlayerY=.78;
 function beep(freq=540,duration=.055,type='sine',volume=.045){if(!soundOn)return;try{audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.value=volume;o.connect(g);g.connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.stop(audioCtx.currentTime+duration)}catch(e){}}
 function clickSound(){beep(620,.045);setTimeout(()=>beep(850,.035,'triangle',.025),35)}
 $('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'♫  SOUND: ON':'♫  SOUND: OFF';if(soundOn)clickSound()};
@@ -18,10 +18,10 @@ $('startBtn').onclick=()=>{clickSound();startGame()};$('pauseBtn').onclick=()=>{
 function showOverlay(title,msg){$('overlayTitle').textContent=title;$('overlayText').textContent=msg;$('overlay').classList.add('show')}
 function resize(){dpr=Math.min(window.devicePixelRatio||1,2);canvasW=window.innerWidth;canvasH=window.innerHeight;canvas.width=Math.floor(canvasW*dpr);canvas.height=Math.floor(canvasH*dpr);canvas.style.width=canvasW+'px';canvas.style.height=canvasH+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}window.addEventListener('resize',resize);resize();
 function roadGeom(){const w=canvasW,h=canvasH;const roadW=Math.min(w*.82,470),left=(w-roadW)/2;return {w,h,roadW,left,right:left+roadW,laneW:roadW/3}}
-function startGame(){resize();lobby.classList.remove('active');game.classList.add('active');$('overlay').classList.remove('show');running=true;paused=false;ended=false;last=performance.now();roadScroll=0;distance=0;speed=175;playerX=.5;playerY=.78;traffic=[];spawnClock=0;crashFlash=0;for(let i=0;i<4;i++)spawnTraffic(-i*175-130);requestAnimationFrame(frame)}
-function spawnTraffic(y=-80){const r=roadGeom(),lane=Math.floor(Math.random()*3);let kind;const roll=Math.random();kind=roll<.48?'sedan':roll<.75?'truck':'motor';traffic.push({kind,lane,x:(lane+.5)/3,y:y-r.h*.18,pace:.52+Math.random()*.36,color:kind==='truck'?'#39a900':kind==='motor'?'#19a6df':['#f26a37','#4399e8','#dedede','#e6bd30'][Math.floor(Math.random()*4)],passed:false})}
+function startGame(){resize();lobby.classList.remove('active');game.classList.add('active');$('overlay').classList.remove('show');running=true;paused=false;ended=false;last=performance.now();roadScroll=0;distance=0;speed=320;playerX=.5;playerY=.78;traffic=[];spawnClock=0;crashFlash=0;for(let i=0;i<4;i++)spawnTraffic(-i*175-130);requestAnimationFrame(frame)}
+function spawnTraffic(y=-80){const r=roadGeom(),lane=Math.floor(Math.random()*3);let kind;const roll=Math.random();kind=roll<.48?'sedan':roll<.75?'truck':'motor';const x=(lane+.5)/3;traffic.push({kind,lane,targetLane:lane,x,targetX:x,y:y-r.h*.18,pace:.52+Math.random()*.36,changeClock:1.1+Math.random()*2.3,steer:0,color:kind==='truck'?'#39a900':kind==='motor'?'#19a6df':['#f26a37','#4399e8','#dedede','#e6bd30'][Math.floor(Math.random()*4)],passed:false})}
 function roundedRect(x,y,w,h,r,fill,stroke){ctx.beginPath();ctx.roundRect(x,y,w,h,r);if(fill){ctx.fillStyle=fill;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=1.5;ctx.stroke()}}
-function drawCar(x,y,w,h,color,kind='sedan',player=false){ctx.save();ctx.translate(x,y);const s=kind==='truck'?1:kind==='motor'?.58:1;ctx.scale(s,1); // every vehicle points UP, same direction
+function drawCar(x,y,w,h,color,kind='sedan',player=false,angle=0){ctx.save();ctx.translate(x,y);ctx.rotate(angle||0);const s=kind==='truck'?1:kind==='motor'?.58:1;ctx.scale(s,1); // every vehicle points UP, same direction
 // shadow
 ctx.fillStyle='#0007';ctx.beginPath();ctx.ellipse(2,5,w*.55,h*.48,0,0,Math.PI*2);ctx.fill();
 if(kind==='truck'){
@@ -43,14 +43,31 @@ const dashH=42,gap=35,offset=roadScroll%(dashH+gap);ctx.fillStyle='#f4f3e9';for(
 for(let y=-20+(roadScroll%75);y<h;y+=75){ctx.fillStyle='#ff9b30';ctx.fillRect(left-10,y,4,15);ctx.fillRect(right+6,y+30,4,15)}
 }
 function draw(){const {w,h,roadW,left,right,laneW}=roadGeom();ctx.clearRect(0,0,w,h);drawRoad(); // perspective-like top-down traffic
-traffic.sort((a,b)=>a.y-b.y);for(const t of traffic){const x=left+t.x*roadW;const th=t.kind==='truck'?78:t.kind==='motor'?43:59;const tw=t.kind==='truck'?40:t.kind==='motor'?22:34;drawCar(x,t.y,tw,th,t.color,t.kind,false)}
+traffic.sort((a,b)=>a.y-b.y);for(const t of traffic){const x=left+t.x*roadW;const th=t.kind==='truck'?78:t.kind==='motor'?43:59;const tw=t.kind==='truck'?40:t.kind==='motor'?22:34;drawCar(x,t.y,tw,th,t.color,t.kind,false,t.steer||0)}
 const px=left+playerX*roadW;drawCar(px,h*playerY,Math.min(43,roadW*.12),Math.min(78,h*.105),'#f32620','player',true);
 if(crashFlash>0){ctx.fillStyle=`rgba(255,60,0,${Math.min(.3,crashFlash*.3)})`;ctx.fillRect(0,0,w,h)}
 }
 function frame(now){if(!running)return;requestAnimationFrame(frame);if(paused)return;let dt=Math.min((now-last)/1000,.05);last=now;if(!dt)return;
 // Auto-forward motion: road marks and traffic move down relative to the player.
-speed=Math.min(300,175+distance/1000*5.0);const metersPerSec=speed/3.6;distance+=metersPerSec*dt;roadScroll+=metersPerSec*dt*1.65;spawnClock+=dt;if(spawnClock>(1.15-Math.min(.35,distance/40000))){spawnClock=0;spawnTraffic(-90)}
-for(const t of traffic){t.y+=metersPerSec*dt*(.95+t.pace*.42);if(!t.passed&&t.y>canvasH*playerY+50){t.passed=true;beep(330,.025,'sine',.012)}}
+speed=Math.min(650,320+distance/1000*22);const metersPerSec=speed/3.6;distance+=metersPerSec*dt;roadScroll+=metersPerSec*dt*1.9;spawnClock+=dt;if(spawnClock>(1.15-Math.min(.35,distance/40000))){spawnClock=0;spawnTraffic(-90)}
+for(const t of traffic){
+ // NPC traffic periodically changes lanes and eases into the next lane.
+ // Motorcycles are more unpredictable; trucks change lanes less often.
+ t.changeClock-=dt;
+ if(t.changeClock<=0){
+   const chance=t.kind==='motor'?.88:t.kind==='truck'?.42:.68;
+   if(Math.random()<chance){
+     const options=[0,1,2].filter(l=>l!==t.targetLane && Math.abs(l-t.targetLane)<=1);
+     if(options.length && Math.random()<.78){t.targetLane=options[Math.floor(Math.random()*options.length)];t.targetX=(t.targetLane+.5)/3;}
+   }
+   t.changeClock=(t.kind==='motor'?1.0:t.kind==='truck'?2.4:1.5)+Math.random()*(t.kind==='motor'?1.6:2.5);
+ }
+ const oldX=t.x;const shiftRate=(t.kind==='motor'?.34:t.kind==='truck'?.17:.25)*dt;
+ t.x+=(t.targetX-t.x)*Math.min(1,shiftRate*3.2);
+ t.steer=Math.max(-.16,Math.min(.16,(t.x-oldX)*-2.4));
+ t.y+=metersPerSec*dt*(.95+t.pace*.42);
+ if(!t.passed&&t.y>canvasH*playerY+50){t.passed=true;beep(330,.025,'sine',.012)}
+}
 traffic=traffic.filter(t=>t.y<canvasH+120);const r=roadGeom(),px=r.left+playerX*r.roadW,py=canvasH*playerY,pw=Math.min(43,r.roadW*.12),ph=Math.min(78,canvasH*.105);
 for(const t of traffic){const th=t.kind==='truck'?78:t.kind==='motor'?43:59,tw=t.kind==='truck'?40:t.kind==='motor'?22:34,tx=r.left+t.x*r.roadW;if(Math.abs(tx-px)<(tw+pw)*.43&&Math.abs(t.y-py)<(th+ph)*.43){crashFlash=.7;running=false;ended=true;showOverlay('TABRAKAN!','Balapan berhenti. Coba geser lebih awal untuk menghindari kendaraan. Jarak: '+(distance/1000).toFixed(2)+' km.');beep(140,.24,'sawtooth',.07);return}}
 crashFlash=Math.max(0,crashFlash-dt);$('speed').textContent=Math.round(speed);$('distance').textContent=(distance/1000).toFixed(2);$('lap').textContent=Math.min(3,Math.floor(distance/lapLength)+1)+'/3';if(distance>=totalLength){running=false;ended=true;showOverlay('FINISH! 🏁','Keren! Lu menyelesaikan 3 lap dengan jarak 15 km.');beep(700,.1);setTimeout(()=>beep(900,.16),130);return}draw()}
